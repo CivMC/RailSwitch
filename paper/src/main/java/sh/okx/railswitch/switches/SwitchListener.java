@@ -37,31 +37,55 @@ public class SwitchListener implements Listener {
      */
     @EventHandler
     public void onSwitchTrigger(BlockRedstoneEvent event) {
-        Block block = event.getBlock();
+        Block rail = event.getBlock();
         // Block must be a detector rail being triggered
-        if (!WorldUtils.isValidBlock(block)
-                || block.getType() != Material.DETECTOR_RAIL
+        if (!WorldUtils.isValidBlock(rail)
+                || rail.getType() != Material.DETECTOR_RAIL
                 || event.getNewCurrent() != 15) {
             return;
         }
-        // Check that the block above the rail is a sign
-        Block above = block.getRelative(BlockFace.UP);
-        if (!Tag.SIGNS.isTagged(above.getType())
-                || !(above.getState() instanceof Sign)) {
-            return;
+
+        // Search for a rail sign and use the first one found
+
+        boolean sign_found = false;
+        String[] lines = null;
+        SwitchType type = null;
+        Block sign = null;
+
+        Block[] sign_locations = new Block[] {
+            rail.getRelative(BlockFace.UP), //Above the rail
+            rail.getRelative(BlockFace.DOWN, 2), //Below the block the rail rests on
+        };
+
+        for (Block block : sign_locations) {
+            if (block == null) continue;
+
+            // Check that the block is a sign
+            if (!Tag.SIGNS.isTagged(block.getType())
+                    || !(block.getState() instanceof Sign)) {
+                continue;
+            }
+
+            // Check that the sign has a valid switch type
+            lines = ((Sign) block.getState()).getLines();
+            type = SwitchType.find(lines[0]);
+            if (type == null) {
+                continue;
+            }
+
+            sign_found = true;
+            sign = block;
+            break;
         }
-        // Check that the sign has a valid switch type
-        String[] lines = ((Sign) above.getState()).getLines();
-        SwitchType type = SwitchType.find(lines[0]);
-        if (type == null) {
-            return;
-        }
+
+        if (!sign_found) return;
+
         // Check that a player is triggering the switch
         // NOTE: The event doesn't provide the information and so the next best thing is searching for a
         //       player who is nearby and riding a minecart.
         Player player = null; {
             double searchDistance = Double.MAX_VALUE;
-            for (Entity entity : block.getWorld().getNearbyEntities(block.getLocation(), 3, 3, 3)) {
+            for (Entity entity : rail.getWorld().getNearbyEntities(rail.getLocation(), 3, 3, 3)) {
                 if (!(entity instanceof Player)) {
                     continue;
                 }
@@ -72,7 +96,7 @@ public class SwitchListener implements Listener {
                         || !(vehicle instanceof Minecart)) {
                     continue;
                 }
-                double distance = block.getLocation().distanceSquared(entity.getLocation());
+                double distance = rail.getLocation().distanceSquared(entity.getLocation());
                 if (distance < searchDistance) {
                     searchDistance = distance;
                     player = (Player) entity;
@@ -84,10 +108,11 @@ public class SwitchListener implements Listener {
         }
         // If Citadel is enabled, check that the sign and the rail are on the same group
         if (CITADEL_GLUE.isSafeToUse()) {
-            if (!CITADEL_GLUE.doSignAndRailHaveSameReinforcement(above, block)) {
+            if (!CITADEL_GLUE.doSignAndRailHaveSameReinforcement(sign, rail)) {
                 return;
             }
         }
+
         // Determine whether a player has a destination that matches one of the destinations
         // listed on the switch signs, or match if there's a wildcard.
         boolean matched = false;
