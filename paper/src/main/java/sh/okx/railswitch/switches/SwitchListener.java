@@ -1,7 +1,5 @@
 package sh.okx.railswitch.switches;
 
-import com.google.common.base.Strings;
-import java.util.Arrays;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -23,8 +21,6 @@ import vg.civcraft.mc.civmodcore.world.WorldUtils;
  * Switch listener that implements switch functionality.
  */
 public class SwitchListener implements Listener {
-
-    public static final String WILDCARD = "*";
 
     public static final CitadelGlue CITADEL_GLUE = new CitadelGlue(RailSwitchPlugin.getPlugin(RailSwitchPlugin.class));
 
@@ -48,9 +44,9 @@ public class SwitchListener implements Listener {
         // Search for a rail sign and use the first one found
 
         boolean sign_found = false;
-        String[] lines = null;
-        SwitchType type = null;
         Block sign = null;
+        String[] lines = null;
+		SwitchLogic logic = null;
 
         Block[] sign_locations = new Block[] {
             rail.getRelative(BlockFace.UP), //Above the rail
@@ -68,14 +64,17 @@ public class SwitchListener implements Listener {
 
             // Check that the sign has a valid switch type
             lines = ((Sign) block.getState()).getLines();
-            type = SwitchType.find(lines[0]);
+            /*type = SwitchType.find(lines[0]);
             if (type == null) {
                 continue;
-            }
-
-            sign_found = true;
-            sign = block;
-            break;
+            }*/
+			try {
+				logic = SwitchLogic.try_create(lines);
+				sign = block;
+				sign_found = true;
+				break;
+			}
+			catch (Exception e) { continue; }
         }
 
         if (!sign_found) return;
@@ -112,43 +111,15 @@ public class SwitchListener implements Listener {
                 return;
             }
         }
-
-        // Determine whether a player has a destination that matches one of the destinations
-        // listed on the switch signs, or match if there's a wildcard.
-        boolean matched = false;
-        String setDest = SettingsManager.getDestination(player);
-        if (!Strings.isNullOrEmpty(setDest)) {
-            String[] playerDestinations = setDest.split(" ");
-            String[] switchDestinations = Arrays.copyOfRange(lines, 1, lines.length);
-            matcher:
-            for (String playerDestination : playerDestinations) {
-                if (Strings.isNullOrEmpty(playerDestination)) {
-                    continue;
-                }
-                if (playerDestination.equals(WILDCARD)) {
-                    matched = true;
-                    break;
-                }
-                for (String switchDestination : switchDestinations) {
-                    if (Strings.isNullOrEmpty(switchDestination)) {
-                        continue;
-                    }
-                    if (switchDestination.equals(WILDCARD)
-                            || playerDestination.equalsIgnoreCase(switchDestination)) {
-                        matched = true;
-                        break matcher;
-                    }
-                }
-            }
-        }
-        switch (type) {
-            case NORMAL:
-                event.setNewCurrent(matched ? 15 : 0);
-                break;
-            case INVERTED:
-                event.setNewCurrent(matched ? 0 : 15);
-                break;
-        }
+		
+		//Do the rail switching
+        String dest_string = SettingsManager.getDestination(player);
+		try {
+			if (logic.decide(dest_string)) event.setNewCurrent(15);
+			else event.setNewCurrent(0);
+		} catch (Exception e) {
+			event.setNewCurrent(0);
+		}
     }
 
 }
