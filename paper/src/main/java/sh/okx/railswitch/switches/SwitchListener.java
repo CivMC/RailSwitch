@@ -1,6 +1,8 @@
 package sh.okx.railswitch.switches;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -74,7 +76,10 @@ public class SwitchListener implements Listener {
 				sign_found = true;
 				break;
 			}
-			catch (Exception e) { continue; }
+			catch (Exception e) {
+				emit_failure_smoke(block.getLocation());
+				continue;
+			}
         }
 
         if (!sign_found) return;
@@ -118,8 +123,15 @@ public class SwitchListener implements Listener {
 			if (logic.decide(dest_string)) event.setNewCurrent(15);
 			else event.setNewCurrent(0);
 		} catch (Exception e) {
+			emit_failure_smoke(sign.getLocation());
 			event.setNewCurrent(0);
 		}
     }
+
+	/** Emit a campfire particle at the location of the sign to indicate failure */
+	public void emit_failure_smoke(Location block_coordinates) {
+		Location location = block_coordinates.add(0.5, 0.5, 0.5);
+		location.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, location, 0, 0.0, 0.0, 0.0, 3.0);
+	}
 
 }

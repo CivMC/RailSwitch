@@ -20,7 +20,13 @@ public abstract class SwitchLogic {
 		//Regex destinations
 		Matcher regex = DestExLogic.DESTEX.matcher(lines[0]);
 		if (regex.matches()) return new DestExLogic(lines, regex);
+
+		//Failure to specify the [] bits
+		if (lines[0].length() >= 2 && lines[0].charAt(0) == '[' && lines[0].charAt(lines[0].length() - 1) == ']') {
+			throw new RuntimeException("Unknown logic specifier");
+		}
 		
 		return null;
 	}
+
 }
