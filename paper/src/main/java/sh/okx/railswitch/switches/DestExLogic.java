@@ -26,6 +26,7 @@ public class DestExLogic extends SwitchLogic {
 		boolean multi_match = false;
 		String raw_flags = match.group(2);
 		if (raw_flags != null) {
+			raw_flags = raw_flags.toLowerCase();
 			for (int i = 0; i < raw_flags.length(); i++) {
 				switch (raw_flags.charAt(0)) {
 					case 'e': flags |= Pattern.CANON_EQ; break;
@@ -33,8 +34,8 @@ public class DestExLogic extends SwitchLogic {
 					case 'c': flags |= Pattern.COMMENTS; break;
 					case 'd': flags |= Pattern.DOTALL; break;
 					case 'l': flags |= Pattern.LITERAL; break;
-					case 'U': flags |= Pattern.UNICODE_CASE; break;
 					case 'u': flags |= Pattern.UNICODE_CHARACTER_CLASS; break;
+					case 'b': flags |= Pattern.UNICODE_CASE; break;
 
 					case 'm':
 						flags |= Pattern.MULTILINE | Pattern.UNIX_LINES;

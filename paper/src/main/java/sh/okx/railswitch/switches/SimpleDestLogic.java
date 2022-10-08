@@ -7,8 +7,8 @@ import java.util.Arrays;
  * Logic for the traditional, simple destination matching
  */
 public class SimpleDestLogic extends SwitchLogic {
-	public static final String NORMAL = "[destination]";
-	public static final String INVERTED = "[!destination]";
+	public static final String NORMAL = "[dest]";
+	public static final String INVERTED = "[!dest]";
 
 	public final String[] switchDestinations;
 	public final boolean inverted;
