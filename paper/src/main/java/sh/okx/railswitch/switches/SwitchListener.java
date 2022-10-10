@@ -51,8 +51,13 @@ public class SwitchListener implements Listener {
 		SwitchLogic logic = null;
 
         Block[] sign_locations = new Block[] {
-            rail.getRelative(BlockFace.UP), //Above the rail
-            rail.getRelative(BlockFace.DOWN, 2), //Below the block the rail rests on
+			//Above the rail
+            rail.getRelative(BlockFace.UP),
+			//On the sides of the rail
+            rail.getRelative(BlockFace.NORTH),
+            rail.getRelative(BlockFace.WEST),
+            rail.getRelative(BlockFace.EAST),
+            rail.getRelative(BlockFace.SOUTH)
         };
 
         for (Block block : sign_locations) {
@@ -120,7 +125,7 @@ public class SwitchListener implements Listener {
 		//Do the rail switching
         String dest_string = SettingsManager.getDestination(player);
 		try {
-			if (logic.decide(dest_string)) event.setNewCurrent(15);
+			if (logic.decide(player)) event.setNewCurrent(15);
 			else event.setNewCurrent(0);
 		} catch (Exception e) {
 			emit_failure_smoke(sign.getLocation());

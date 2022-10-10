@@ -3,6 +3,10 @@ package sh.okx.railswitch.switches;
 import com.google.common.base.Strings;
 import java.util.Arrays;
 
+import org.bukkit.entity.Player;
+
+import sh.okx.railswitch.settings.SettingsManager;
+
 /**
  * Logic for the traditional, simple destination matching
  */
@@ -22,9 +26,10 @@ public class SimpleDestLogic extends SwitchLogic {
     public static final String WILDCARD = "*";
 
 	@Override
-	public boolean decide(String setDest) {
+	public boolean decide(Player player) {
         // Determine whether a player has a destination that matches one of the destinations
         // listed on the switch signs, or match if there's a wildcard.
+        String setDest = SettingsManager.getDestination(player);
 
         boolean matched = false;
         if (!Strings.isNullOrEmpty(setDest)) {
