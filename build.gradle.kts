@@ -1,9 +1,9 @@
-import net.civmc.civgradle.common.util.civRepo
+//import net.civmc.civgradle.common.util.civRepo
 
 plugins {
     `java-library`
     `maven-publish`
-    id("net.civmc.civgradle.plugin") version "1.0.0-SNAPSHOT"
+    id("net.civmc.civgradle") version "2.0.0-SNAPSHOT"
 }
 
 // Temporary hack:
@@ -19,7 +19,7 @@ allprojects {
 }
 
 subprojects {
-	apply(plugin = "net.civmc.civgradle.plugin")
+	apply(plugin = "net.civmc.civgradle")
 	apply(plugin = "java-library")
 	apply(plugin = "maven-publish")
 
@@ -31,9 +31,23 @@ subprojects {
 
 	repositories {
 		mavenCentral()
-        civRepo("CivMC/CivModCore")
+		val civ_repos = arrayOf(
+			"CivMC/CivModCore",
+			"CivMC/NameLayer",
+			"CivMC/Citadel",
+		)
+		for (repo in civ_repos) {
+			maven {
+				url = uri("https://maven.pkg.github.com/$repo")
+				credentials {
+					username = System.getenv("GITHUB_ACTOR")
+					password = System.getenv("GITHUB_TOKEN")
+				}
+			}
+		}
+        /*civRepo("CivMC/CivModCore")
         civRepo("CivMC/NameLayer")
-        civRepo("CivMC/Citadel")
+        civRepo("CivMC/Citadel")*/
 	}
 
 	publishing {
