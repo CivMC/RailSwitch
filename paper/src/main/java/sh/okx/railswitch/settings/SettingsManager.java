@@ -51,7 +51,7 @@ public final class SettingsManager {
      */
     public static void setDestination(Player player, String destination) {
         Preconditions.checkArgument(player != null);
-		if (destination != null) destination = destination.trim();
+        if (destination != null) destination = destination.trim();
         if (Strings.isNullOrEmpty(destination)) {
             if (resetSetting != null) {
                 resetSetting.resetPlayerDestination(player);
@@ -61,9 +61,9 @@ public final class SettingsManager {
                 player.sendMessage(ChatColor.RED + "Could not reset your destination.");
             }
         }
-		else if (destination.length() > 256) {
-			player.sendMessage(ChatColor.RED + "Could not set your destination. It is over 256 characters.");
-		}
+        else if (destination.length() > 256) {
+            player.sendMessage(ChatColor.RED + "Could not set your destination. It is over 256 characters.");
+        }
         else {
             if (destSetting != null) {
                 destSetting.setValue(player, destination);

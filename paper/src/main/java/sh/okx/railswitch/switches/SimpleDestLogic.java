@@ -32,38 +32,38 @@ public class SimpleDestLogic extends SwitchLogic {
 		switchDestinations = Arrays.copyOfRange(lines, 1, lines.length);
 	}
 
-    public static final String WILDCARD = "*";
+	public static final String WILDCARD = "*";
 
 	@Override
 	public boolean decide(Player player) {
-        // Determine whether a player has a destination that matches one of the destinations
-        // listed on the switch signs, or match if there's a wildcard.
-        String setDest = SettingsManager.getDestination(player);
+		// Determine whether a player has a destination that matches one of the destinations
+		// listed on the switch signs, or match if there's a wildcard.
+		String setDest = SettingsManager.getDestination(player);
 
-        boolean matched = false;
-        if (!Strings.isNullOrEmpty(setDest)) {
-            String[] playerDestinations = setDest.split(" ");
-            matcher:
-            for (String playerDestination : playerDestinations) {
-                if (Strings.isNullOrEmpty(playerDestination)) {
-                    continue;
-                }
-                if (playerDestination.equals(WILDCARD)) {
-                    matched = true;
-                    break;
-                }
-                for (String switchDestination : switchDestinations) {
-                    if (Strings.isNullOrEmpty(switchDestination)) {
-                        continue;
-                    }
-                    if (switchDestination.equals(WILDCARD)
-                            || playerDestination.equalsIgnoreCase(switchDestination)) {
-                        matched = true;
-                        break matcher;
-                    }
-                }
-            }
-        }
+		boolean matched = false;
+		if (!Strings.isNullOrEmpty(setDest)) {
+			String[] playerDestinations = setDest.split(" ");
+			matcher:
+			for (String playerDestination : playerDestinations) {
+				if (Strings.isNullOrEmpty(playerDestination)) {
+					continue;
+				}
+				if (playerDestination.equals(WILDCARD)) {
+					matched = true;
+					break;
+				}
+				for (String switchDestination : switchDestinations) {
+					if (Strings.isNullOrEmpty(switchDestination)) {
+						continue;
+					}
+					if (switchDestination.equals(WILDCARD)
+							|| playerDestination.equalsIgnoreCase(switchDestination)) {
+						matched = true;
+						break matcher;
+					}
+				}
+			}
+		}
 
 		return matched ^ inverted;
 	}

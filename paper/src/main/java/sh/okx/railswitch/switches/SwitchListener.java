@@ -48,12 +48,12 @@ public class SwitchListener implements Listener {
         boolean sign_found = false;
         Block sign = null;
         String[] lines = null;
-		SwitchLogic logic = null;
+        SwitchLogic logic = null;
 
         Block[] sign_locations = new Block[] {
-			//Above the rail
+            //Above the rail
             rail.getRelative(BlockFace.UP),
-			//On the sides of the rail
+            //On the sides of the rail
             rail.getRelative(BlockFace.NORTH),
             rail.getRelative(BlockFace.WEST),
             rail.getRelative(BlockFace.EAST),
@@ -75,16 +75,16 @@ public class SwitchListener implements Listener {
             if (type == null) {
                 continue;
             }*/
-			try {
-				logic = SwitchLogic.try_create(lines);
-				sign = block;
-				sign_found = true;
-				break;
-			}
-			catch (Exception e) {
-				emit_failure_smoke(block.getLocation());
-				continue;
-			}
+            try {
+                logic = SwitchLogic.try_create(lines);
+                sign = block;
+                sign_found = true;
+                break;
+            }
+            catch (Exception e) {
+                emit_failure_smoke(block.getLocation());
+                continue;
+            }
         }
 
         if (!sign_found) return;
@@ -121,22 +121,22 @@ public class SwitchListener implements Listener {
                 return;
             }
         }
-		
-		//Do the rail switching
+        
+        //Do the rail switching
         String dest_string = SettingsManager.getDestination(player);
-		try {
-			if (logic.decide(player)) event.setNewCurrent(15);
-			else event.setNewCurrent(0);
-		} catch (Exception e) {
-			emit_failure_smoke(sign.getLocation());
-			event.setNewCurrent(0);
-		}
+        try {
+            if (logic.decide(player)) event.setNewCurrent(15);
+            else event.setNewCurrent(0);
+        } catch (Exception e) {
+            emit_failure_smoke(sign.getLocation());
+            event.setNewCurrent(0);
+        }
     }
 
-	/** Emit a campfire particle at the location of the sign to indicate failure */
-	public void emit_failure_smoke(Location block_coordinates) {
-		Location location = block_coordinates.add(0.5, 0.5, 0.5);
-		location.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, location, 0, 0.0, 0.0, 0.0, 3.0);
-	}
+    /** Emit a campfire particle at the location of the sign to indicate failure */
+    public void emit_failure_smoke(Location block_coordinates) {
+        Location location = block_coordinates.add(0.5, 0.5, 0.5);
+        location.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, location, 0, 0.0, 0.0, 0.0, 3.0);
+    }
 
 }
