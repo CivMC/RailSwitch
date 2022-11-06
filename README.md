@@ -1,26 +1,100 @@
 # RailSwitch
+Enhanced redstone features for detector rails, allowing players to build advanced routing systems.
 
-## How to use
+## Usage
+### Travelers
+When traveling on RailSwitch rails, you need to set a destination. Enter the command `/dest`, folloowed by any number of words. The list of words becomes your destinations. For example: `/dest icenia ita factory` sets 3 active destinations: `icenia`, `ita`, and `factory`. Using `/dest` by itself clears any destinations you have set previously.
 
-### Setup
+Destinations do nothing on their own. It is up for rail engineers to build RailSwitches to handle these destinations.
+### Rail engineers
+RailSwitches modify the redstone output from detector rails, only causing output when certain conditions are met. Note: this only applies to minecarts with players. Minecarts without players will trigger detector rails like normal.
 
-1. Place a sign in the block above a detector rail. **It must be reinforced on the same group as the detector rail.**
-2. The first line must be `[destination]` (case insensitive)
-3. The second, third and fourth lines can be destination names.
-4. When a player passes over the detector rail, it will only activate and emit redstone if a player set their destination as any of the three on the sign.
+To build switches:
+1. Place a sign above or next to a detector rail. **The sign must be reinforced on the same group as the detector rail.**
+2. Put a RailSwitch on the first line. The simplest switch is `[destination]`.
+3. The rest of the lines provide details for the switch. For `[destination]` switches, each line is a destination to test for.
+4. When a player passes over the detector rail, the switch will try and execute based on the player's set destinations. For `[destination]` switches, the detector rail outputs redstone if the player has any one of the destinations set.
 
-You may also use `[!destination]`, which will activate the rail if a player's destination is **not** on the signs.
+For the more advanced switches, it is possible to make errors. If a switch has an error in it, a puff of smoke will appear when a player tries to activate it.
 
-### Usage
+## RailSwitches
 
-1. Type `/dest <destination>`
-2. Go AFK
-3. Arrive
+### Simple Destination Check
+- Normal: `[destination]` or `[dest]`
+- Inverted: `[!destination]` or `[!dest]`
 
-You can also use spaces in a `/dest` command as an "or" operator, like `/dest <destination1> <destination2>`. In this command, RailSwitch will route players towards signs that contain either `<destination1>` or `<destination2>`. 
+Outputs a redstone signal if the player has any one of the listed destinations currently set. Each detail line is considered 1 destination, meaning a single simple destination switch can check for up to 3 destinations. The exact text `*` will match any set destination. If the inverted varriant is used, a redstone signal will be outputted only if the player has none of the listed destinations set.
 
-Another way to think about it is that `/dest` takes multiple arguments. Each argument is a destination that will be checked as you pass a sign.
+Example: The following switch would output a redstone signal if the player has any one of `ti`, `temporal`, or `archive` destinations currently set.
+```
+[destination]
+ti
+temporal
+archive
+```
 
-### Example Video
+### RegularExpression Destination Check
+- Normal : `[destex]` or `[destex;<flags>]`
+- Inverted: `[!destex]` or `[!destex;<flags>]`
+
+Outputs a redstone signal if any one of the player's destinations matches the given regular expression. All three detail lines are concatenated together (no separating characters) to form the regular expression. The [REJ2 regex library](https://github.com/google/re2j) performs the matching to prevent people from trolling the server with catestrophic backtracking. If the inverted varriant is used, a redstone signal will be outputted only if none of the player's destinations match the regular expression. Optionally, one or more flags can be specified in the header to change the behavior of the matching.
+
+Accepted regular expression flags:
+- `i` - match destinations case-intensively
+- `m` - run the regular expression against the entire space-separated list of destinations, rather than on each individual destination
+- `d` - enables ["dotall"](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/dotAll)
+- `u` - disables unicode groups
+
+Example: The following switch would output a redstone signal if the user has the `icenia` destination set *or* if they have any `icenia_` + anything destinations set, such as `icenia_factory`
+```
+[destex]
+icenia_?\w*
+
+
+
+```
+
+### Destination Adding
+- Normal: `[destadd]`
+
+Sets additional destiantions for the player. Each detail line is considered 1 destination, meaning 1 destadd switch can add 3 destinations. Destinations will not be duplicated: if a player already has a destination set, it will not be set a second time. The switch outputs a redstone signal if any one of the 3 destinations was set.
+
+Example: the following switch would set destinations `icenia`, `ita`, and `alador` for the player.
+```
+[destadd]
+icenia
+ita
+alador
+```
+
+### Destination Removing
+- Normal: `[destrm]`
+
+Unsets destinations for the player. Each detail line is considered 1 destination, meaning 1 destrm switch can remove 3 destinations. The switch outputs a redstone signal if any one of the 3 destinations was unset from the player.
+
+Example: the following switch would unset destinations `usa` and `ri` for the player.
+```
+[destrm]
+usa
+rn
+
+
+```
+
+### RegularExpression Destination Removing
+- Normal: `[destrmex]` or `[destrmex;<flags>]`
+
+Unsets any destination the player has that matches a regular expression. Regular expression behavior is the same as the RegularExpression Destination Check switch, although the `m` flag is not supported for destination removing. The switch outputs a redstone signal if any destination was unset from the player.
+
+Example: the following switch would unset any destinations starting with `ti_` or containing `temporal`, ignoring case.
+```
+[destrmex;i]
+ti_.*|.*temporal.*
+
+
+
+```
+
+## Example Video
 
 [![RailSwitch Demo Video](https://img.youtube.com/vi/GKku2fcB-wY/0.jpg)](https://www.youtube.com/watch?v=GKku2fcB-wY)
