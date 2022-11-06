@@ -14,7 +14,7 @@ import sh.okx.railswitch.settings.SettingsManager;
  * Logic for removing destinations via regular expressions
  */
 public class RemoveDestExLogic extends SwitchLogic {
-	public static final Pattern DESTEX = Pattern.compile("\\[destrmex(?:;(\\w+)?)?\\]", Pattern.CASE_INSENSITIVE);
+	public static final Pattern DESTEX = Pattern.compile("\\[destrmex(?:;(\\w*))?\\]", Pattern.CASE_INSENSITIVE);
 
 	public final Pattern pattern;
 	//public final boolean multi_match;

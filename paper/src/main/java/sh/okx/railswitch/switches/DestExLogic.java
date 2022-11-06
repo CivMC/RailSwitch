@@ -12,7 +12,7 @@ import sh.okx.railswitch.settings.SettingsManager;
  * Logic for destination matching via regular expressions
  */
 public class DestExLogic extends SwitchLogic {
-	public static final Pattern DESTEX = Pattern.compile("\\[(!)?destex(?:;(\\w+)?)?\\]", Pattern.CASE_INSENSITIVE);
+	public static final Pattern DESTEX = Pattern.compile("\\[(!)?destex(?:;(\\w*))?\\]", Pattern.CASE_INSENSITIVE);
 
 	public final Pattern pattern;
 	public final boolean inverted;
@@ -20,7 +20,7 @@ public class DestExLogic extends SwitchLogic {
 
 	public DestExLogic(String[] lines, Matcher match) throws Exception {
 		super();
-		pattern = DestExUtils.compile_pattern(Arrays.copyOfRange(lines, 1, lines.length), match.group(1));
+		pattern = DestExUtils.compile_pattern(Arrays.copyOfRange(lines, 1, lines.length), match.group(2));
 		this.multi_match = (pattern.flags() & Pattern.MULTILINE) > 0;
 
 		//If there's an exclamation mark before destex, it's inverted
