@@ -15,7 +15,7 @@ public abstract class SwitchLogic {
 
 	public static SwitchLogic try_create(String[] lines) throws Exception {
 		//Simple destinations
-		if (lines[0].equalsIgnoreCase(SimpleDestLogic.NORMAL) || lines[0].equalsIgnoreCase(SimpleDestLogic.INVERTED))
+		if (SimpleDestLogic.isNormal(lines[0]) || SimpleDestLogic.isInverted(lines[0]))
 			return new SimpleDestLogic(lines);
 
 		//Regex destinations

@@ -11,15 +11,24 @@ import sh.okx.railswitch.settings.SettingsManager;
  * Logic for the traditional, simple destination matching
  */
 public class SimpleDestLogic extends SwitchLogic {
-	public static final String NORMAL = "[dest]";
-	public static final String INVERTED = "[!dest]";
+	public static final String NORMAL_V1 = "[destination]";
+	public static final String NORMAL_V2 = "[dest]";
+	public static final String INVERTED_V1 = "[!destination]";
+	public static final String INVERTED_V2 = "[!dest]";
+	
+	public static boolean isNormal(String dest_line) {
+		return dest_line.equalsIgnoreCase(NORMAL_V1) || dest_line.equalsIgnoreCase(NORMAL_V2);
+	}
+	public static boolean isInverted(String dest_line) {
+		return dest_line.equalsIgnoreCase(INVERTED_V1) || dest_line.equalsIgnoreCase(INVERTED_V2);
+	}
 
 	public final String[] switchDestinations;
 	public final boolean inverted;
 
 	public SimpleDestLogic(String[] lines) throws Exception {
 		super();
-		inverted = lines[0].equalsIgnoreCase(INVERTED);
+		inverted = isInverted(lines[0]);
 		switchDestinations = Arrays.copyOfRange(lines, 1, lines.length);
 	}
 
