@@ -42,9 +42,8 @@ public class SimpleDestLogic extends SwitchLogic {
 
 		boolean matched = false;
 		if (!Strings.isNullOrEmpty(setDest)) {
-			String[] playerDestinations = setDest.split(" ");
 			matcher:
-			for (String playerDestination : playerDestinations) {
+			for (String playerDestination : DestIterator.iterate(setDest)) {
 				if (Strings.isNullOrEmpty(playerDestination)) {
 					continue;
 				}

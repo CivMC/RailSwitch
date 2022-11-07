@@ -19,13 +19,13 @@ public class AddDestLogic extends SwitchLogic {
 	@Override
 	public boolean decide(Player player) {
 		boolean did_something = false;
-		ArrayList<String> dests = new ArrayList(Arrays.asList(SettingsManager.getDestination(player).split(" ")));
+		String dest_string = SettingsManager.getDestination(player);
 
 		for (String additional_dest : to_add) {
-			if (additional_dest.trim().length() == 0) continue;
+			if (additional_dest.isBlank()) continue;
 
 			boolean already_exists = false;
-			for (String dest : dests) {
+			for (String dest : DestIterator.iterate(dest_string)) {
 				if (dest.equals(additional_dest)) {
 					already_exists = true;
 					break;
@@ -33,13 +33,13 @@ public class AddDestLogic extends SwitchLogic {
 			}
 
 			if (!already_exists) {
-				dests.add(additional_dest);
+				dest_string += " " + additional_dest;
 				did_something = true;
 			}
 		}
 
 		if (did_something) {
-			SettingsManager.setDestination(player, String.join(" ", dests));
+			SettingsManager.setDestination(player, dest_string);
 			return true;
 		}
 		return false;

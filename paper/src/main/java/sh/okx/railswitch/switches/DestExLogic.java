@@ -36,7 +36,7 @@ public class DestExLogic extends SwitchLogic {
 			return matcher.matches();
 		} else {
 			//Otherwise, run the regex against each dest individually
-			for (String dest : dest_string.split(" ")) {
+			for (String dest : DestIterator.iterate(dest_string)) {
 				Matcher matcher = pattern.matcher(dest);
 				if (matcher.matches()) return true;
 			}

@@ -1,13 +1,13 @@
 package sh.okx.railswitch.switches;
 
+import java.util.Iterator;
 
 import com.google.re2j.Pattern;
 
 public class DestExUtils {
+	/** Compile a pattern from an array of strings and additional flags */
 	static Pattern compile_pattern(String[] lines, String raw_flags) throws Exception {
-		StringBuilder pattern_appender = new StringBuilder();
-		for (String line : lines) pattern_appender.append(line);
-		String pattern_text = pattern_appender.toString();
+		String pattern_text = String.join("", lines);
 
 		//Optional flags may have been specified in the first line
 		int flags = 0;

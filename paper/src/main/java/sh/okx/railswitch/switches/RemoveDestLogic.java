@@ -20,12 +20,12 @@ public class RemoveDestLogic extends SwitchLogic {
 	@Override
 	public boolean decide(Player player) {
 		boolean did_something = false;
-		ArrayList<String> dests = new ArrayList(Arrays.asList(SettingsManager.getDestination(player).split(" ")));
+		String dest_string = SettingsManager.getDestination(player);
 
-		Iterator<String> iter = dests.iterator();
+		DestIterator iter = new DestIterator(dest_string);
 		while (iter.hasNext()) {
 			String dest = iter.next();
-			if (dest.trim().length() == 0) continue;
+			if (dest.isBlank()) continue;
 
 			for (String remove_dest : to_remove) {
 				if (dest.equals(remove_dest)) {
@@ -37,7 +37,7 @@ public class RemoveDestLogic extends SwitchLogic {
 		}
 
 		if (did_something) {
-			SettingsManager.setDestination(player, String.join(" ", dests));
+			SettingsManager.setDestination(player, iter.dest_string());
 			return true;
 		}
 		return false;

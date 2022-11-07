@@ -32,8 +32,8 @@ public abstract class SwitchLogic {
 		Matcher destexrm = RemoveDestExLogic.DESTEX.matcher(lines[0]);
 		if (destexrm.matches()) return new RemoveDestExLogic(lines, destexrm);
 
-		//Failure to specify the [] bits
-		if (lines[0].length() >= 2 && lines[0].charAt(0) == '[' && lines[0].charAt(lines[0].length() - 1) == ']') {
+		//Invalid header
+		if (lines[0].startsWith("[") && lines[0].endsWith("]")) {
 			throw new RuntimeException("Unknown logic specifier");
 		}
 		
