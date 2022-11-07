@@ -3,19 +3,19 @@ Enhanced redstone features for detector rails, allowing players to build advance
 
 ## Usage
 ### Travelers
-When traveling on RailSwitch rails, you need to set a destination. Enter the command `/dest`, followed by any number of words. The list of words becomes your destinations. For example: `/dest icenia ita factory` sets 3 active destinations: `icenia`, `ita`, and `factory`. Using `/dest` by itself clears any destinations you have set previously.
+When traveling on RailSwitch rails, you need to set a destination. Enter the command `/dest`, followed by any number of words. Each word becomes one of your destinations. For example: `/dest icenia ita factory` sets 3 active destinations: `icenia`, `ita`, and `factory`. Using `/dest` by itself clears any destinations you had set previously.
 
 Destinations do nothing on their own. It is up for rail engineers to build RailSwitches to handle these destinations.
 ### Rail engineers
-RailSwitches modify the redstone output from detector rails, only causing output when certain conditions are met. Note: this only applies to minecarts with players. Minecarts without players will trigger detector rails like normal.
+RailSwitches modify the redstone output from detector rails, only allowing output when certain conditions are met. Note: this only applies to minecarts with players. Minecarts without players will trigger detector rails normally.
 
 To build switches:
 1. Place a sign above or next to a detector rail. **The sign must be reinforced on the same group as the detector rail.**
 2. Put a RailSwitch on the first line. The simplest switch is `[destination]`.
-3. The rest of the lines provide details for the switch. For `[destination]` switches, each line is a destination to test for.
-4. When a player passes over the detector rail, the switch will try and execute based on the player's set destinations. For `[destination]` switches, the detector rail outputs redstone if the player has any one of the destinations set.
+3. Put switch details on the rest of the lines. For `[destination]` switches, each line is a destination to test for.
+4. When a player passes over the detector rail, the switch will try and execute based on the player's set destinations. For `[destination]` switches, the detector rail outputs redstone if the player has any one of the listed destinations set.
 
-For the more advanced switches, it is possible to make errors. If a switch has an error in it, a puff of smoke will appear when a player tries to activate it.
+For more advanced switches, it is possible to make errors. If a switch has an error in it, a puff of smoke will appear when a player tries to activate it.
 
 ## RailSwitches
 
@@ -23,7 +23,7 @@ For the more advanced switches, it is possible to make errors. If a switch has a
 - Normal: `[destination]` or `[dest]`
 - Inverted: `[!destination]` or `[!dest]`
 
-Outputs a redstone signal if the player has any one of the listed destinations currently set. Each detail line is considered 1 destination, meaning a single simple destination switch can check for up to 3 destinations. The exact text `*` will match any set destination. If the inverted variant is used, a redstone signal will be outputted only if the player has none of the listed destinations set.
+Outputs a redstone signal if the player has any one of the listed destinations currently set. Each detail line is considered 1 destination, meaning a single simple destination switch can check for up to 3 destinations. The exact destination `*` will match if the player has atleast 1 destination set. If the inverted variant is used, a redstone signal will be outputted only if the player has none of the listed destinations set.
 
 Example: The following switch would output a redstone signal if the player has any one of `ti`, `temporal`, or `archive` destinations currently set.
 ```
@@ -40,12 +40,12 @@ archive
 Outputs a redstone signal if any one of the player's destinations matches the given regular expression. All three detail lines are concatenated together (no separating characters) to form the regular expression. The [REJ2 regex library](https://github.com/google/re2j) performs the matching to prevent people from trolling the server with catastrophic backtracking. If the inverted variant is used, a redstone signal will be outputted only if none of the player's destinations match the regular expression. Optionally, one or more flags can be specified in the header to change the behavior of the matching.
 
 Accepted regular expression flags:
-- `i` - match destinations case-intensively
-- `m` - run the regular expression against the entire space-separated list of destinations, rather than on each individual destination
+- `i` - ignore case while matching destinations
+- `m` - match the regular expression against the entire, space-separated list of destinations, rather than on each individual destination
 - `d` - enables ["dotall"](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/dotAll)
 - `u` - disables unicode groups
 
-Example: The following switch would output a redstone signal if the user has the `icenia` destination set *or* if they have any `icenia_` + anything destinations set, such as `icenia_factory`
+Example: The following switch would output a redstone signal if the user has the `icenia` destination set, or if they have any `icenia_` + anything destinations set, such as `icenia_factory`
 ```
 [destex]
 icenia_?\w*
@@ -76,7 +76,7 @@ Example: the following switch would unset destinations `usa` and `ri` for the pl
 ```
 [destrm]
 usa
-rn
+ri
 
 
 ```
@@ -84,7 +84,7 @@ rn
 ### RegularExpression Destination Removing
 - Normal: `[destrmex]` or `[destrmex;<flags>]`
 
-Unsets any destination the player has that matches a regular expression. Regular expression behavior is the same as the RegularExpression Destination Check switch, although the `m` flag is not supported for destination removing. The switch outputs a redstone signal if any destination was unset from the player.
+Unsets any destinations matching a regular expression for the player. Regular expression behavior is the same as the RegularExpression Destination Check switch, although the `m` flag is not supported for destination removing. The switch outputs a redstone signal if any destination was unset from the player.
 
 Example: the following switch would unset any destinations starting with `ti_` or containing `temporal`, ignoring case.
 ```
