@@ -13,24 +13,24 @@ public abstract class SwitchLogic {
 
 	abstract boolean decide(Player player) throws Exception;
 
-	public static SwitchLogic try_create(String[] lines) throws Exception {
+	public static SwitchLogic tryCreate(String[] lines) throws Exception {
 		//Simple destinations
-		if (SimpleDestLogic.isNormal(lines[0]) || SimpleDestLogic.isInverted(lines[0]))
-			return new SimpleDestLogic(lines);
+		if (DestinationLogic.isNormal(lines[0]) || DestinationLogic.isInverted(lines[0]))
+			return new DestinationLogic(lines);
 
 		//Regex destinations
 		Matcher destex = DestExLogic.DESTEX.matcher(lines[0]);
 		if (destex.matches()) return new DestExLogic(lines, destex);
 
 		//Destination adding
-		if (lines[0].equalsIgnoreCase(AddDestLogic.INVOCATION)) return new AddDestLogic(lines);
+		if (lines[0].equalsIgnoreCase(DestAddLogic.INVOCATION)) return new DestAddLogic(lines);
 
 		//Destination removal
-		if (lines[0].equalsIgnoreCase(RemoveDestLogic.INVOCATION)) return new RemoveDestLogic(lines);
+		if (lines[0].equalsIgnoreCase(DestRmLogic.INVOCATION)) return new DestRmLogic(lines);
 
 		//Destination removal via regex
-		Matcher destexrm = RemoveDestExLogic.DESTEX.matcher(lines[0]);
-		if (destexrm.matches()) return new RemoveDestExLogic(lines, destexrm);
+		Matcher destexrm = DestRmExLogic.DESTEX.matcher(lines[0]);
+		if (destexrm.matches()) return new DestRmExLogic(lines, destexrm);
 
 		//Invalid header
 		if (lines[0].startsWith("[") && lines[0].endsWith("]")) {

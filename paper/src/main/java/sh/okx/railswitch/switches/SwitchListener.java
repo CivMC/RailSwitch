@@ -45,12 +45,12 @@ public class SwitchListener implements Listener {
 
         // Search for a rail sign and use the first one found
 
-        boolean sign_found = false;
+        boolean signFound = false;
         Block sign = null;
         String[] lines = null;
         SwitchLogic logic = null;
 
-        Block[] sign_locations = new Block[] {
+        Block[] signLocations = new Block[] {
             //Above the rail
             rail.getRelative(BlockFace.UP),
             //On the sides of the rail
@@ -60,7 +60,7 @@ public class SwitchListener implements Listener {
             rail.getRelative(BlockFace.SOUTH)
         };
 
-        for (Block block : sign_locations) {
+        for (Block block : signLocations) {
             if (block == null) continue;
 
             // Check that the block is a sign
@@ -76,18 +76,18 @@ public class SwitchListener implements Listener {
                 continue;
             }*/
             try {
-                logic = SwitchLogic.try_create(lines);
+                logic = SwitchLogic.tryCreate(lines);
                 sign = block;
-                sign_found = true;
+                signFound = true;
                 break;
             }
             catch (Exception e) {
-                emit_failure_smoke(block.getLocation());
+                emitFailureSmoke(block.getLocation());
                 continue;
             }
         }
 
-        if (!sign_found) return;
+        if (!signFound) return;
 
         // Check that a player is triggering the switch
         // NOTE: The event doesn't provide the information and so the next best thing is searching for a
@@ -123,17 +123,16 @@ public class SwitchListener implements Listener {
         }
         
         //Do the rail switching
-        String dest_string = SettingsManager.getDestination(player);
         try { event.setNewCurrent( logic.decide(player) ? 15 : 0 ); }
         catch (Exception e) {
-            emit_failure_smoke(sign.getLocation());
+            emitFailureSmoke(sign.getLocation());
             event.setNewCurrent(0);
         }
     }
 
     /** Emit a campfire particle at the location of the sign to indicate failure */
-    public void emit_failure_smoke(Location block_coordinates) {
-        block_coordinates.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, block_coordinates.toCenterLocation(), 0, 0.0, 0.0, 0.0, 3.0);
+    public void emitFailureSmoke(Location blockCoordinates) {
+        blockCoordinates.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, blockCoordinates.toCenterLocation(), 0, 0.0, 0.0, 0.0, 3.0);
     }
 
 }
