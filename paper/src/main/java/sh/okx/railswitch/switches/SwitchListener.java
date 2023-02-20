@@ -6,25 +6,31 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.bukkit.Location;
+import net.minecraft.world.level.block.DetectorRailBlock;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Lectern;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.AnaloguePowerable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.material.Redstone;
 import sh.okx.railswitch.RailSwitchPlugin;
+import sh.okx.railswitch.RedstoneUtils;
 import sh.okx.railswitch.glue.CitadelGlue;
 import sh.okx.railswitch.settings.SettingsManager;
+import sh.okx.railswitch.switches.rules.SwitchExpression;
 import vg.civcraft.mc.civmodcore.world.WorldUtils;
 
 /**
@@ -43,7 +49,7 @@ public class SwitchListener implements Listener {
      *
      * @param event The block redstone event to base the switch's existence on.
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onSwitchTrigger(BlockRedstoneEvent event) {
         Block block = event.getBlock();
         // Block must be a detector rail being triggered
@@ -53,9 +59,22 @@ public class SwitchListener implements Listener {
             return;
         }
 
+        List<String> dests;
         Player player = this.getPlayerInMinecartAt(block);
-        if(player == null){
-            return;
+        if(player != null){
+            dests = getPlayerDestinations(player);
+        }else{
+            Entity entity = this.getVehicle(block);
+            if(entity == null){
+                return;
+            }
+
+            String customName = entity.getCustomName();
+            if(customName == null){
+                return;
+            }
+
+            dests = Arrays.stream(customName.split(" ")).toList();
         }
 
         for(BlockFace face : WorldUtils.ALL_SIDES){
@@ -71,7 +90,8 @@ public class SwitchListener implements Listener {
 
             if(Tag.SIGNS.isTagged(checkBlock.getType())){
                 Sign sign = (Sign) checkBlock.getState();
-                List<String> lines = List.of(sign.getLines());
+                List<String> lines = Arrays.stream(sign.getLines()).filter(str -> !Strings.isNullOrEmpty(str))
+                        .toList();
                 if(lines == null || lines.size() == 0){
                     return;
                 }
@@ -81,9 +101,30 @@ public class SwitchListener implements Listener {
                     continue;
                 }
 
+                SwitchExpression exp = SwitchExpression.compile(lines, type == SwitchType.INVERTED);
+                RailSwitchPlugin.getInstance(RailSwitchPlugin.class).info(exp.toString());
+                int result = exp.test(dests);
+                RailSwitchPlugin.getInstance(RailSwitchPlugin.class).info("Test output: " + result);
+                event.setNewCurrent(result);
+                Bukkit.getScheduler().runTaskLater(RailSwitchPlugin.getInstance(RailSwitchPlugin.class), () -> {
+                    for(BlockFace bf : WorldUtils.ALL_SIDES) {
+                        int blockDist = face == BlockFace.DOWN ? 2 : 1;
+                        Block rsBlock = block.getRelative(bf, blockDist);
+                        DetectorRailBlock b = (DetectorRailBlock) rsBlock;
+                        if(rsBlock.getType() == Material.REDSTONE_WIRE){
+                            //AnaloguePowerable powerable = (AnaloguePowerable) rsBlock.getBlockData();
+                            //powerable.setPower(result);
+                            //rsBlock.setBlockData(powerable);
+                            RedstoneUtils.setRedstonePower(rsBlock, result);
+                        }
+                    }
+                }, 1L);
+
+                /*
                 event.setNewCurrent(type == SwitchType.NORMAL ?
                         (this.hasDestination(lines.toArray(new String[0]), player) ? 15 : 0) :
                         (this.hasDestination(lines.toArray(new String[0]), player) ? 0 : 15));
+                 */
                 return;
             }else if(checkBlock.getType() == Material.LECTERN){
                 Lectern lectern = (Lectern) checkBlock.getState();
@@ -95,7 +136,8 @@ public class SwitchListener implements Listener {
 
                 BookMeta bookMeta = (BookMeta) item.getItemMeta();
                 List<String> text = new ArrayList<>();
-                bookMeta.getPages().stream().map(page -> page.split("\n"))
+                bookMeta.getPages().stream().filter(str -> !Strings.isNullOrEmpty(str))
+                        .map(page -> page.split("\n"))
                         .forEach(page -> text.addAll(List.of(page)));
 
                 if(text.size() == 0){
@@ -109,15 +151,63 @@ public class SwitchListener implements Listener {
                     continue;
                 }
 
-                String[] lines = text.toArray(new String[0]);
+                //String[] lines = text.toArray(new String[0]);
+                SwitchExpression exp = SwitchExpression.compile(text, type == SwitchType.INVERTED);
+                RailSwitchPlugin.getInstance(RailSwitchPlugin.class).info(exp.toString());
+                int result = exp.test(dests);
+                RailSwitchPlugin.getInstance(RailSwitchPlugin.class).info("Test output: " + result);
+                event.setNewCurrent(result);
+                Bukkit.getScheduler().runTaskLater(RailSwitchPlugin.getInstance(RailSwitchPlugin.class), () -> {
+                    for(BlockFace bf : WorldUtils.ALL_SIDES) {
+                        int blockDist = face == BlockFace.DOWN ? 2 : 1;
+                        Block rsBlock = block.getRelative(bf, blockDist);
+
+                        if(rsBlock.getType() == Material.REDSTONE_WIRE){
+                            //AnaloguePowerable powerable = (AnaloguePowerable) rsBlock.getBlockData();
+                            //powerable.setPower(result);
+                            //rsBlock.setBlockData(powerable);
+                            RedstoneUtils.setRedstonePower(rsBlock, result);
+                        }
+                    }
+                }, 1L);
+
+                /*
                 boolean hasDest = this.hasDestination(lines, player);
 
                 event.setNewCurrent(type == SwitchType.NORMAL ?
                         (hasDest ? 15 : 0) :
                         (hasDest ? 0 : 15));
+                 */
                 return;
             }
         }
+    }
+
+    private Entity getVehicle(Block block) {
+        Entity ent = null; {
+            double searchDistance = Double.MAX_VALUE;
+            for (Entity entity : block.getWorld().getNearbyEntities(block.getLocation(), 3, 3, 3)) {
+                if (!(entity instanceof Minecart)) {
+                    continue;
+                }
+                Entity vehicle = entity;
+                // TODO: This should be abstracted into CivModCore
+                if (vehicle == null
+                        || (vehicle.getType() != EntityType.MINECART
+                        && vehicle.getType() != EntityType.MINECART_CHEST
+                        && vehicle.getType() != EntityType.MINECART_FURNACE
+                        && vehicle.getType() != EntityType.MINECART_HOPPER)) {
+                    continue;
+                }
+                double distance = block.getLocation().distanceSquared(entity.getLocation());
+                if (distance < searchDistance) {
+                    searchDistance = distance;
+                    ent = entity;
+                }
+            }
+        }
+
+        return ent;
     }
 
     // Check that a player is triggering the switch
@@ -148,38 +238,13 @@ public class SwitchListener implements Listener {
         return player;
     }
 
-    // Determine whether a player has a destination that matches one of the destinations
-    // listed on the switch signs, or match if there's a wildcard.
-    private boolean hasDestination(String[] lines, Player player){
-        boolean matched = false;
+    private List<String> getPlayerDestinations(Player player){
         String setDest = SettingsManager.getDestination(player);
         if (!Strings.isNullOrEmpty(setDest)) {
-            String[] playerDestinations = setDest.split(" ");
-            String[] switchDestinations = Arrays.copyOf(lines, lines.length);
-
-            matcher:
-            for (String playerDestination : playerDestinations) {
-                if (Strings.isNullOrEmpty(playerDestination)) {
-                    continue;
-                }
-                if (playerDestination.equals(WILDCARD)) {
-                    matched = true;
-                    break;
-                }
-                for (String switchDestination : switchDestinations) {
-                    if (Strings.isNullOrEmpty(switchDestination)) {
-                        continue;
-                    }
-                    if (switchDestination.equals(WILDCARD)
-                            || playerDestination.equalsIgnoreCase(switchDestination)) {
-                        matched = true;
-                        break matcher;
-                    }
-                }
-            }
+            return Arrays.stream(setDest.split(" ")).toList();
         }
 
-        return matched;
+        return new ArrayList<>();
     }
 
 }

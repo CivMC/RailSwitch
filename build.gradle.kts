@@ -4,6 +4,7 @@ plugins {
     `java-library`
     `maven-publish`
     id("net.civmc.civgradle.plugin") version "1.0.0-SNAPSHOT"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 // Temporary hack:
@@ -14,7 +15,7 @@ gradle.buildFinished {
 
 allprojects {
 	group = "net.civmc.railswitch"
-	version = "2.0.0-SNAPSHOT"
+	version = "2.1.0-SNAPSHOT"
 	description = "RailSwitch"
 }
 
@@ -22,6 +23,7 @@ subprojects {
 	apply(plugin = "net.civmc.civgradle.plugin")
 	apply(plugin = "java-library")
 	apply(plugin = "maven-publish")
+    apply(plugin = "com.github.johnrengelman.shadow")
 
 	java {
 		toolchain {
